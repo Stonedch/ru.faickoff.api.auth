@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ${DOCKER_NAME}-db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./database/postgresql/data:/var/lib/postgresql/data/
+    networks:
+      - main
+
+  tomcat:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${DOCKER_NAME}-tomcat
+    ports:
+      - "${TOMCAT_PORT}:${TOMCAT_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - main
+
+networks:
+  main:
+    driver: bridge
+    name: ${DOCKER_NETWORK_NAME}
