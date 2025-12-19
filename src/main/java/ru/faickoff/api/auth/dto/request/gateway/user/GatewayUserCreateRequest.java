@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class GatewayUserCreateRequest {
 
     @NotNull(message = "The \"username\" field cannot be null")
-    @Size(min = 8, max = 255, message = "The \"username\" field must be between 8 and 255 characters long")
+    @Size(min = 4, max = 255, message = "The \"username\" field must be between 4 and 255 characters long")
     private String username;
 
     @NotNull(message = "The \"password\" field cannot be null")

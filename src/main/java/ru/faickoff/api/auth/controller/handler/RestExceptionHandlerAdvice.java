@@ -2,9 +2,14 @@ package ru.faickoff.api.auth.controller.handler;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -15,6 +20,82 @@ import ru.faickoff.api.auth.dto.response.error.BaseErrorResponse;
 @ControllerAdvice
 @Log4j2
 public class RestExceptionHandlerAdvice {
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<BaseErrorResponse> handleException(
+            IllegalArgumentException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        BaseErrorResponse responseBody = BaseErrorResponse.builder()
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error(ex.getMessage())
+                .details(Collections.emptyMap())
+                .build();
+
+        RestExceptionHandlerAdvice.log.warn(responseBody);
+
+        return ResponseEntity.status(status).body(responseBody);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<BaseErrorResponse> handleException(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        Map<String, String> details = new HashMap<>();
+        ex.getFieldErrors().stream()
+                .forEach(error -> details.put(error.getField(), error.getDefaultMessage()));
+
+        BaseErrorResponse responseBody = BaseErrorResponse.builder()
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error("Argument validation failed")
+                .details(details)
+                .build();
+
+        RestExceptionHandlerAdvice.log.warn(responseBody);
+
+        return ResponseEntity.status(status).body(responseBody);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<BaseErrorResponse> handleException(
+            HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        BaseErrorResponse responseBody = BaseErrorResponse.builder()
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error("Content-Type is not supported")
+                .details(Collections.emptyMap())
+                .build();
+
+        RestExceptionHandlerAdvice.log.warn(responseBody);
+
+        return ResponseEntity.status(status).body(responseBody);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<BaseErrorResponse> handleException(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        BaseErrorResponse responseBody = BaseErrorResponse.builder()
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error("Required request body is missing")
+                .details(Collections.emptyMap())
+                .build();
+
+        RestExceptionHandlerAdvice.log.warn(responseBody);
+
+        return ResponseEntity.status(status).body(responseBody);
+    }
 
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<BaseErrorResponse> handleException(
