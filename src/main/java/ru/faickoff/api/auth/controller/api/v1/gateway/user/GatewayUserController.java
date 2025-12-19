@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import ru.faickoff.api.auth.dto.request.gateway.user.GatewayUserCreateRequest;
@@ -23,6 +24,7 @@ import ru.faickoff.api.auth.dto.response.gateway.user.GatewayUserListResponse;
 import ru.faickoff.api.auth.dto.response.gateway.user.GatewayUserResponse;
 import ru.faickoff.api.auth.mapper.user.UserMapper;
 import ru.faickoff.api.auth.model.User;
+import ru.faickoff.api.auth.service.logger.LoggerHttpServletRequestService;
 import ru.faickoff.api.auth.service.user.UserService;
 
 @RestController
@@ -30,18 +32,24 @@ import ru.faickoff.api.auth.service.user.UserService;
 @RequiredArgsConstructor
 public class GatewayUserController {
 
+    private final LoggerHttpServletRequestService logger;
     private final UserService userService;
     private final UserMapper userMapper;
 
     @GetMapping
-    public ResponseEntity<GatewayUserListResponse> getAll() {
+    public ResponseEntity<GatewayUserListResponse> getAll(
+            HttpServletRequest servletRequest) {
+        this.logger.info(servletRequest);
         List<User> users = this.userService.getAll();
         GatewayUserListResponse mappedUsers = this.userMapper.toGatewayUserListResponse(users);
         return ResponseEntity.status(HttpStatus.OK).body(mappedUsers);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GatewayUserResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<GatewayUserResponse> getById(
+            HttpServletRequest servletRequest,
+            @PathVariable Long id) {
+        this.logger.info(servletRequest);
         User user = this.userService.getById(id);
         GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(user);
         return ResponseEntity.status(HttpStatus.OK).body(mappedUser);
@@ -49,7 +57,9 @@ public class GatewayUserController {
 
     @PostMapping
     public ResponseEntity<GatewayUserResponse> create(
+            HttpServletRequest servletRequest,
             @Valid @RequestBody GatewayUserCreateRequest request) {
+        this.logger.info(servletRequest, request.toString());
         User creatingUser = this.userMapper.toUser(request);
         User createdUser = this.userService.create(creatingUser);
         GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(createdUser);
@@ -58,8 +68,10 @@ public class GatewayUserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<GatewayUserResponse> put(
+            HttpServletRequest servletRequest,
             @PathVariable Long id,
             @Valid @RequestBody GatewayUserPutRequest request) {
+        this.logger.info(servletRequest, request.toString());
         User updatingUser = this.userMapper.toUser(request);
         User updatedUser = this.userService.putById(id, updatingUser);
         GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(updatedUser);
@@ -68,8 +80,10 @@ public class GatewayUserController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<GatewayUserResponse> patch(
+            HttpServletRequest servletRequest,
             @PathVariable Long id,
             @Valid @RequestBody GatewayUserPatchRequest request) {
+        this.logger.info(servletRequest, request.toString());
         User updatingUser = this.userMapper.toUser(request);
         User updatedUser = this.userService.patchById(id, updatingUser);
         GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(updatedUser);
@@ -77,7 +91,10 @@ public class GatewayUserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteById(
+            HttpServletRequest servletRequest,
+            @PathVariable Long id) {
+        this.logger.info(servletRequest);
         this.userService.deleteById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

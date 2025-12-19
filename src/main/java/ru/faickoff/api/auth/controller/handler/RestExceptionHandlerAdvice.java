@@ -12,6 +12,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
@@ -20,6 +21,25 @@ import ru.faickoff.api.auth.dto.response.error.BaseErrorResponse;
 @ControllerAdvice
 @Log4j2
 public class RestExceptionHandlerAdvice {
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<BaseErrorResponse> handleException(
+            NoResourceFoundException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
+        BaseErrorResponse responseBody = BaseErrorResponse.builder()
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error(ex.getMessage())
+                .details(Collections.emptyMap())
+                .build();
+
+        RestExceptionHandlerAdvice.log.warn(responseBody);
+
+        return ResponseEntity.status(status).body(responseBody);
+    }
+
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<BaseErrorResponse> handleException(

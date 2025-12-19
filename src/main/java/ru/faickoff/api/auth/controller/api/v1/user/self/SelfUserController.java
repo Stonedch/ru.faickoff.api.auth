@@ -8,27 +8,38 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import ru.faickoff.api.auth.service.logger.LoggerHttpServletRequestService;
+
 @RestController
 @RequestMapping("/api/v1/users/self")
+@RequiredArgsConstructor
 public class SelfUserController {
 
+    private final LoggerHttpServletRequestService logger;
+
     @GetMapping
-    public ResponseEntity<Void> getSelfUser() {
+    public ResponseEntity<Void> getSelfUser(HttpServletRequest servletRequest) {
+        this.logger.info(servletRequest);
         throw new UnsupportedOperationException("Not implemented");
     }
 
     @PutMapping
-    public ResponseEntity<Void> putSelfUser() {
+    public ResponseEntity<Void> putSelfUser(HttpServletRequest servletRequest) {
+        this.logger.info(servletRequest);
         throw new UnsupportedOperationException("Not implemented");
     }
 
     @PatchMapping
-    public ResponseEntity<Void> patchSelfUser() {
+    public ResponseEntity<Void> patchSelfUser(HttpServletRequest servletRequest) {
+        this.logger.info(servletRequest);
         throw new UnsupportedOperationException("Not implemented");
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteSelfUser() {
+    public ResponseEntity<Void> deleteSelfUser(HttpServletRequest servletRequest) {
+        this.logger.info(servletRequest);
         throw new UnsupportedOperationException("Not implemented");
     }
 }
