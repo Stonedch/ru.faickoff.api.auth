@@ -14,21 +14,21 @@ public class SelfUserController {
 
     @GetMapping
     public ResponseEntity<Void> getSelfUser() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @PutMapping
     public ResponseEntity<Void> putSelfUser() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @PatchMapping
     public ResponseEntity<Void> patchSelfUser() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deleteSelfUser() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented");
     }
 }

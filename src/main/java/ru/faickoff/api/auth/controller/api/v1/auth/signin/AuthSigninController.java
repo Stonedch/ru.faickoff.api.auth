@@ -11,6 +11,6 @@ public class AuthSigninController {
 
     @PostMapping
     public ResponseEntity<Void> signin() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented");
     }
 }

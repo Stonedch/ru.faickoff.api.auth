@@ -11,6 +11,6 @@ public class AuthRefreshController {
 
     @PostMapping
     public ResponseEntity<Void> refresh() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not implemented");
     }
 }
