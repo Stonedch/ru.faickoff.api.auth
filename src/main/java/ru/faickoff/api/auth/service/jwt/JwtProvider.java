@@ -19,9 +19,12 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.NonNull;
 import lombok.experimental.NonFinal;
+import lombok.extern.log4j.Log4j2;
+import ru.faickoff.api.auth.exception.TokenValidationException;
 import ru.faickoff.api.auth.model.User;
 
 @Service
+@Log4j2
 public class JwtProvider {
 
     private final SecretKey jwtAccessSecret;
@@ -68,11 +71,11 @@ public class JwtProvider {
                 .compact();
     }
 
-    public boolean validateAccessToken(@NonNull String accessToken) {
+    public boolean validateAccessToken(@NonNull String accessToken) throws TokenValidationException {
         return this.validateToken(accessToken, this.jwtAccessSecret);
     }
 
-    public boolean validateRefreshToken(@NonNull String refreshToken) {
+    public boolean validateRefreshToken(@NonNull String refreshToken) throws TokenValidationException {
         return this.validateToken(refreshToken, this.jwtRefreshSecret);
     }
 
@@ -84,7 +87,7 @@ public class JwtProvider {
         return this.getClaims(token, jwtRefreshSecret);
     }
 
-    private boolean validateToken(@NonNull String token, @NonNull SecretKey secret) {
+    private boolean validateToken(@NonNull String token, @NonNull SecretKey secret) throws TokenValidationException {
         try {
             Jwts.parser()
                     .verifyWith(secret)
@@ -93,13 +96,13 @@ public class JwtProvider {
 
             return true;
         } catch (ExpiredJwtException e) {
-            throw new IllegalStateException("Token expired", e);
+            throw new TokenValidationException("Token expired", e);
         } catch (UnsupportedJwtException e) {
-            throw new IllegalStateException("Unsupported jwt", e);
+            throw new TokenValidationException("Unsupported jwt", e);
         } catch (MalformedJwtException e) {
-            throw new IllegalStateException("Malformed jwt", e);
+            throw new TokenValidationException("Malformed jwt", e);
         } catch (Exception e) {
-            throw new IllegalStateException("invalid token", e);
+            throw new TokenValidationException("invalid token", e);
         }
     }
 

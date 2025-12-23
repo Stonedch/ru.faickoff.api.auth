@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
 import ru.faickoff.api.auth.dto.request.jwt.JwtRequest;
 import ru.faickoff.api.auth.dto.response.jwt.JwtResponse;
+import ru.faickoff.api.auth.exception.TokenValidationException;
 import ru.faickoff.api.auth.model.User;
 import ru.faickoff.api.auth.service.user.UserService;
 
@@ -24,10 +25,10 @@ public class JwtService {
     private final RefreshStorage refreshStorage;
 
     public JwtResponse signin(@NonFinal JwtRequest authRequest) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                authRequest.getUsername(), authRequest.getPassword());
-
         try {
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    authRequest.getUsername(), authRequest.getPassword());
+
             this.authenticationManager.authenticate(authenticationToken);
 
             final User user = this.userService.getByUsername(authRequest.getUsername());
@@ -44,25 +45,29 @@ public class JwtService {
     }
 
     public JwtResponse refresh(@NonNull String refreshToken) {
-        jwtProvider.validateRefreshToken(refreshToken);
+        try {
+            jwtProvider.validateRefreshToken(refreshToken);
 
-        final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
-        final String username = claims.getSubject();
+            final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
+            final String username = claims.getSubject();
 
-        String saveRefreshToken = this.refreshStorage.find(username)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+            String saveRefreshToken = this.refreshStorage.find(username)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
 
-        if (!saveRefreshToken.equals(refreshToken)) {
-            throw new IllegalArgumentException("Invalid refresh token");
+            if (!saveRefreshToken.equals(refreshToken)) {
+                throw new IllegalArgumentException("Invalid refresh token");
+            }
+
+            final User user = this.userService.getByUsername(username);
+
+            final String accessToken = jwtProvider.generateAccessToken(user);
+            final String newRefreshToken = jwtProvider.generateRefreshToken(user);
+
+            this.refreshStorage.set(user.getUsername(), newRefreshToken);
+
+            return new JwtResponse(accessToken, newRefreshToken);
+        } catch (TokenValidationException e) {
+            throw new IllegalArgumentException(e.getMessage());
         }
-
-        final User user = this.userService.getByUsername(username);
-
-        final String accessToken = jwtProvider.generateAccessToken(user);
-        final String newRefreshToken = jwtProvider.generateRefreshToken(user);
-
-        this.refreshStorage.set(user.getUsername(), newRefreshToken);
-
-        return new JwtResponse(accessToken, newRefreshToken);
     }
 }
