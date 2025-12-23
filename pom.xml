@@ -22,6 +22,7 @@
         <org.postgresql.postgresql.version>42.7.8</org.postgresql.postgresql.version>
         <org.projectlombok.lombok.version>1.18.42</org.projectlombok.lombok.version>
         <org.flywaydb.version>11.13.3</org.flywaydb.version>
+        <io.jsonwebtoken.version>0.12.3</io.jsonwebtoken.version>
     </properties>
 
     <dependencies>
@@ -62,6 +63,21 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
             <version>${org.flywaydb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${io.jsonwebtoken.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${io.jsonwebtoken.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${io.jsonwebtoken.version}</version>
         </dependency>
     </dependencies>
 

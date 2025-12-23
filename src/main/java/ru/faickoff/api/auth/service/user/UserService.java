@@ -24,6 +24,11 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found by current identifier"));
     }
 
+    public User getByUsername(String username) {
+        return this.userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found by current username"));
+    }
+
     public User save(User saving) {
         if (saving.getUsername() == null || saving.getUsername().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be empty");
@@ -75,9 +80,9 @@ public class UserService {
         }
 
         Optional.ofNullable(updating.getUsername())
-            .ifPresent(username -> user.setUsername(updating.getUsername()));
+                .ifPresent(username -> user.setUsername(updating.getUsername()));
         Optional.ofNullable(updating.getPassword())
-            .ifPresent(password -> user.setPassword(updating.getPassword()));
+                .ifPresent(password -> user.setPassword(updating.getPassword()));
 
         User updated = this.save(user);
 

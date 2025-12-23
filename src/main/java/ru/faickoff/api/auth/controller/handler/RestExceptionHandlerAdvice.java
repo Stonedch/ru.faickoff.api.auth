@@ -40,6 +40,23 @@ public class RestExceptionHandlerAdvice {
         return ResponseEntity.status(status).body(responseBody);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<BaseErrorResponse> handleException(
+            IllegalStateException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        BaseErrorResponse responseBody = BaseErrorResponse.builder()
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error(ex.getMessage())
+                .details(Collections.emptyMap())
+                .build();
+
+        RestExceptionHandlerAdvice.log.warn(responseBody);
+
+        return ResponseEntity.status(status).body(responseBody);
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<BaseErrorResponse> handleException(

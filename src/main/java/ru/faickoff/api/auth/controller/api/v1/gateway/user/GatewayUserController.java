@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,6 +38,7 @@ public class GatewayUserController {
     private final UserMapper userMapper;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<GatewayUserListResponse> getAll(
             HttpServletRequest servletRequest) {
         this.logger.info(servletRequest);
@@ -46,6 +48,7 @@ public class GatewayUserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<GatewayUserResponse> getById(
             HttpServletRequest servletRequest,
             @PathVariable Long id) {
@@ -56,6 +59,7 @@ public class GatewayUserController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<GatewayUserResponse> create(
             HttpServletRequest servletRequest,
             @Valid @RequestBody GatewayUserCreateRequest request) {
@@ -67,6 +71,7 @@ public class GatewayUserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<GatewayUserResponse> put(
             HttpServletRequest servletRequest,
             @PathVariable Long id,
@@ -79,6 +84,7 @@ public class GatewayUserController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<GatewayUserResponse> patch(
             HttpServletRequest servletRequest,
             @PathVariable Long id,
@@ -91,6 +97,7 @@ public class GatewayUserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteById(
             HttpServletRequest servletRequest,
             @PathVariable Long id) {
