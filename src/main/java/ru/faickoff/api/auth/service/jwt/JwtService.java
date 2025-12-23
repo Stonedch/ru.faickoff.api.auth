@@ -1,8 +1,5 @@
 package ru.faickoff.api.auth.service.jwt;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -24,7 +21,7 @@ public class JwtService {
     private final UserService userService;
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
-    private final Map<String, String> refreshStorage = new HashMap<>();
+    private final RefreshStorage refreshStorage;
 
     public JwtResponse signin(@NonFinal JwtRequest authRequest) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
@@ -32,10 +29,14 @@ public class JwtService {
 
         try {
             this.authenticationManager.authenticate(authenticationToken);
+
             final User user = this.userService.getByUsername(authRequest.getUsername());
+
             final String accessToken = this.jwtProvider.generateAccessToken(user);
             final String refreshToken = this.jwtProvider.generateRefreshToken(user);
-            this.refreshStorage.put(user.getUsername(), refreshToken);
+
+            this.refreshStorage.set(user.getUsername(), refreshToken);
+
             return new JwtResponse(accessToken, refreshToken);
         } catch (AuthenticationException e) {
             throw new IllegalArgumentException("Incorrect username or password");
@@ -48,10 +49,11 @@ public class JwtService {
         final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
         final String username = claims.getSubject();
 
-        final String saveRefreshToken = refreshStorage.get(username);
+        String saveRefreshToken = this.refreshStorage.find(username)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
 
-        if (saveRefreshToken == null || !saveRefreshToken.equals(refreshToken)) {
-            throw new IllegalArgumentException("invalid refresh token");
+        if (!saveRefreshToken.equals(refreshToken)) {
+            throw new IllegalArgumentException("Invalid refresh token");
         }
 
         final User user = this.userService.getByUsername(username);
@@ -59,7 +61,7 @@ public class JwtService {
         final String accessToken = jwtProvider.generateAccessToken(user);
         final String newRefreshToken = jwtProvider.generateRefreshToken(user);
 
-        refreshStorage.put(user.getUsername(), newRefreshToken);
+        this.refreshStorage.set(user.getUsername(), newRefreshToken);
 
         return new JwtResponse(accessToken, newRefreshToken);
     }

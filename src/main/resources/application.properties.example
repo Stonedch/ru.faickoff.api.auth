@@ -27,8 +27,13 @@ spring.flyway.validate-on-migrate=true
 spring.flyway.clean-disabled=true
 spring.flyway.out-of-order=false
 
+spring.data.redis.host=redis
+spring.data.redis.port=6379
+spring.data.redis.password=redis
+spring.data.redis.timeout=60000
+
 ru.faickoff.api.auth.jwt.secret.access=R1s9TSpOdGg2cnwqeD8+PitdZw==
 ru.faickoff.api.auth.jwt.secret.refresh=bzVVT21OaE5+PmgodEIraQ==
 ru.faickoff.api.auth.jwt.expiration.access=300
 ru.faickoff.api.auth.jwt.expiration.refresh=86400
-
+ru.faickoff.api.auth.jwt.storage.prefix.refresh=storage.refresh.
