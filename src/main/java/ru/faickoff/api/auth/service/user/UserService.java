@@ -3,6 +3,7 @@ package ru.faickoff.api.auth.service.user;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import ru.faickoff.api.auth.repository.UserRepository;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<User> getAll() {
         return this.userRepository.findAll();
@@ -44,8 +46,9 @@ public class UserService {
     public User create(User creating) {
         if (this.userRepository.existsByUsername(creating.getUsername())) {
             throw new IllegalArgumentException("A user with this username has already been created");
-
         }
+
+        creating.setPassword(this.passwordEncoder.encode(creating.getPassword()));
 
         User created = this.save(creating);
 
@@ -55,12 +58,7 @@ public class UserService {
     public User put(User updating) {
         User user = this.getById(updating.getId());
 
-        if (this.userRepository.existsByUsernameAndIdNot(updating.getUsername(), user.getId())) {
-            throw new IllegalArgumentException("A user with this username has already been created");
-        }
-
-        user.setUsername(updating.getUsername());
-        user.setPassword(updating.getPassword());
+        user.setPassword(this.passwordEncoder.encode(updating.getPassword()));
 
         User updated = this.save(user);
 
@@ -75,14 +73,8 @@ public class UserService {
     public User patch(User updating) {
         User user = this.getById(updating.getId());
 
-        if (this.userRepository.existsByUsernameAndIdNot(updating.getUsername(), user.getId())) {
-            throw new IllegalArgumentException("A user with this username has already been created");
-        }
-
-        Optional.ofNullable(updating.getUsername())
-                .ifPresent(username -> user.setUsername(updating.getUsername()));
         Optional.ofNullable(updating.getPassword())
-                .ifPresent(password -> user.setPassword(updating.getPassword()));
+                .ifPresent(password -> user.setPassword(this.passwordEncoder.encode(updating.getPassword())));
 
         User updated = this.save(user);
 

@@ -63,7 +63,7 @@ public class GatewayUserController {
     public ResponseEntity<GatewayUserResponse> create(
             HttpServletRequest servletRequest,
             @Valid @RequestBody GatewayUserCreateRequest request) {
-        this.logger.info(servletRequest, request.toString());
+        this.logger.info(servletRequest);
         User creatingUser = this.userMapper.toUser(request);
         User createdUser = this.userService.create(creatingUser);
         GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(createdUser);
@@ -76,7 +76,7 @@ public class GatewayUserController {
             HttpServletRequest servletRequest,
             @PathVariable Long id,
             @Valid @RequestBody GatewayUserPutRequest request) {
-        this.logger.info(servletRequest, request.toString());
+        this.logger.info(servletRequest);
         User updatingUser = this.userMapper.toUser(request);
         User updatedUser = this.userService.putById(id, updatingUser);
         GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(updatedUser);
@@ -89,7 +89,7 @@ public class GatewayUserController {
             HttpServletRequest servletRequest,
             @PathVariable Long id,
             @Valid @RequestBody GatewayUserPatchRequest request) {
-        this.logger.info(servletRequest, request.toString());
+        this.logger.info(servletRequest);
         User updatingUser = this.userMapper.toUser(request);
         User updatedUser = this.userService.patchById(id, updatingUser);
         GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(updatedUser);
