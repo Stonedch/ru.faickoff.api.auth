@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -21,6 +22,24 @@ import ru.faickoff.api.auth.dto.response.error.BaseErrorResponse;
 @ControllerAdvice
 @Log4j2
 public class RestExceptionHandlerAdvice {
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<BaseErrorResponse> handleException(
+            AuthorizationDeniedException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+
+        BaseErrorResponse responseBody = BaseErrorResponse.builder()
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error("Access Denied")
+                .details(Collections.emptyMap())
+                .build();
+
+        RestExceptionHandlerAdvice.log.warn(responseBody);
+
+        return ResponseEntity.status(status).body(responseBody);
+    }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<BaseErrorResponse> handleException(

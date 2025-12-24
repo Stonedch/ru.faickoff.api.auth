@@ -21,11 +21,17 @@ import lombok.RequiredArgsConstructor;
 import ru.faickoff.api.auth.dto.request.gateway.user.GatewayUserCreateRequest;
 import ru.faickoff.api.auth.dto.request.gateway.user.GatewayUserPatchRequest;
 import ru.faickoff.api.auth.dto.request.gateway.user.GatewayUserPutRequest;
+import ru.faickoff.api.auth.dto.request.gateway.user.GatewayUserSetRolesRequest;
+import ru.faickoff.api.auth.dto.response.gateway.role.GatewayRoleListResponse;
 import ru.faickoff.api.auth.dto.response.gateway.user.GatewayUserListResponse;
 import ru.faickoff.api.auth.dto.response.gateway.user.GatewayUserResponse;
+import ru.faickoff.api.auth.mapper.role.RoleMapper;
 import ru.faickoff.api.auth.mapper.user.UserMapper;
+import ru.faickoff.api.auth.model.Role;
 import ru.faickoff.api.auth.model.User;
 import ru.faickoff.api.auth.service.logger.LoggerHttpServletRequestService;
+import ru.faickoff.api.auth.service.user.GatewayUserResponseService;
+import ru.faickoff.api.auth.service.user.UserRoleSetterService;
 import ru.faickoff.api.auth.service.user.UserService;
 
 @RestController
@@ -36,68 +42,78 @@ public class GatewayUserController {
     private final LoggerHttpServletRequestService logger;
     private final UserService userService;
     private final UserMapper userMapper;
+    private final GatewayUserResponseService gatewayUserResponseService;
+    private final UserRoleSetterService userRoleSetterService;
+    private final RoleMapper roleMapper;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<GatewayUserListResponse> getAll(
             HttpServletRequest servletRequest) {
         this.logger.info(servletRequest);
-        List<User> users = this.userService.getAll();
-        GatewayUserListResponse mappedUsers = this.userMapper.toGatewayUserListResponse(users);
+        GatewayUserListResponse mappedUsers = this.gatewayUserResponseService.getAll();
         return ResponseEntity.status(HttpStatus.OK).body(mappedUsers);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<GatewayUserResponse> getById(
             HttpServletRequest servletRequest,
             @PathVariable Long id) {
         this.logger.info(servletRequest);
-        User user = this.userService.getById(id);
-        GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(user);
+        GatewayUserResponse mappedUser = this.gatewayUserResponseService.getById(id);
         return ResponseEntity.status(HttpStatus.OK).body(mappedUser);
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<GatewayUserResponse> create(
             HttpServletRequest servletRequest,
             @Valid @RequestBody GatewayUserCreateRequest request) {
         this.logger.info(servletRequest);
         User creatingUser = this.userMapper.toUser(request);
-        User createdUser = this.userService.create(creatingUser);
-        GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(createdUser);
+        GatewayUserResponse mappedUser = this.gatewayUserResponseService.create(creatingUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(mappedUser);
     }
 
+    @PostMapping("/{id}/roles")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<GatewayRoleListResponse> setRolesByUserId(
+            HttpServletRequest servletRequest,
+            @PathVariable Long id,
+            @Valid @RequestBody GatewayUserSetRolesRequest request) {
+        this.logger.info(servletRequest);
+        List<Role> setted = this.userRoleSetterService.setRolesByUserId(id, request.getRoles());
+        GatewayRoleListResponse mappedRoles = this.roleMapper.toGatewayRoleListResponse(setted);
+        return ResponseEntity.status(HttpStatus.OK).body(mappedRoles);
+    }
+
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<GatewayUserResponse> put(
             HttpServletRequest servletRequest,
             @PathVariable Long id,
             @Valid @RequestBody GatewayUserPutRequest request) {
         this.logger.info(servletRequest);
         User updatingUser = this.userMapper.toUser(request);
-        User updatedUser = this.userService.putById(id, updatingUser);
-        GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(updatedUser);
+        GatewayUserResponse mappedUser = this.gatewayUserResponseService.putById(id, updatingUser);
         return ResponseEntity.status(HttpStatus.OK).body(mappedUser);
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<GatewayUserResponse> patch(
             HttpServletRequest servletRequest,
             @PathVariable Long id,
             @Valid @RequestBody GatewayUserPatchRequest request) {
         this.logger.info(servletRequest);
         User updatingUser = this.userMapper.toUser(request);
-        User updatedUser = this.userService.patchById(id, updatingUser);
-        GatewayUserResponse mappedUser = this.userMapper.toGatewayUserResponse(updatedUser);
+        GatewayUserResponse mappedUser = this.gatewayUserResponseService.patchById(id, updatingUser);
         return ResponseEntity.status(HttpStatus.OK).body(mappedUser);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteById(
             HttpServletRequest servletRequest,
             @PathVariable Long id) {

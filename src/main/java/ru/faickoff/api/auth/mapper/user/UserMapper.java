@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
 import ru.faickoff.api.auth.dto.request.gateway.user.GatewayUserCreateRequest;
 import ru.faickoff.api.auth.dto.request.gateway.user.GatewayUserPatchRequest;
 import ru.faickoff.api.auth.dto.request.gateway.user.GatewayUserPutRequest;
@@ -17,6 +18,7 @@ import ru.faickoff.api.auth.dto.response.user.UserResponse;
 import ru.faickoff.api.auth.model.User;
 
 @Component
+@RequiredArgsConstructor
 public class UserMapper {
 
     public User toUser(GatewayUserCreateRequest gatewayUserCreateRequest) {
@@ -59,11 +61,15 @@ public class UserMapper {
                 .build();
     }
 
+    public List<GatewayUserResponse> toGatewayUserResponses(List<User> users) {
+        return users.stream()
+                .map(this::toGatewayUserResponse)
+                .collect(Collectors.toList());
+    }
+
     public GatewayUserListResponse toGatewayUserListResponse(List<User> users) {
         return GatewayUserListResponse.builder()
-                .users(users.stream()
-                        .map(this::toGatewayUserResponse)
-                        .collect(Collectors.toList()))
+                .users(this.toGatewayUserResponses(users))
                 .build();
     }
 

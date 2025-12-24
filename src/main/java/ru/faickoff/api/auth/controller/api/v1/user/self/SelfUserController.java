@@ -2,6 +2,7 @@ package ru.faickoff.api.auth.controller.api.v1.user.self;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,6 +20,7 @@ import ru.faickoff.api.auth.dto.response.user.UserResponse;
 import ru.faickoff.api.auth.mapper.user.UserMapper;
 import ru.faickoff.api.auth.model.User;
 import ru.faickoff.api.auth.service.logger.LoggerHttpServletRequestService;
+import ru.faickoff.api.auth.service.user.SelfUserResponseService;
 import ru.faickoff.api.auth.service.user.SelfUserService;
 
 @RestController
@@ -27,40 +29,42 @@ import ru.faickoff.api.auth.service.user.SelfUserService;
 public class SelfUserController {
 
     private final LoggerHttpServletRequestService logger;
-    private final SelfUserService selfUserService;
     private final UserMapper userMapper;
+    private final SelfUserService selfUserService;
+    private final SelfUserResponseService selfUserResponseService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<UserResponse> getSelfUser(HttpServletRequest servletRequest) {
         this.logger.info(servletRequest);
-        User selfUser = this.selfUserService.getSelfUser();
-        UserResponse responseBody = this.userMapper.toUserResponse(selfUser);
+        UserResponse responseBody = this.selfUserResponseService.getSelfUser();
         return ResponseEntity.status(HttpStatus.OK).body(responseBody);
     }
 
     @PutMapping
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<UserResponse> putSelfUser(
             HttpServletRequest servletRequest,
             @Valid @RequestBody UserPutRequest request) {
         this.logger.info(servletRequest);
         User updating = this.userMapper.toUser(request);
-        User updated = this.selfUserService.putSelfUser(updating);
-        UserResponse responseBody = this.userMapper.toUserResponse(updated);
+        UserResponse responseBody = this.selfUserResponseService.putSelfUser(updating);
         return ResponseEntity.status(HttpStatus.OK).body(responseBody);
     }
 
     @PatchMapping
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<UserResponse> patchSelfUser(
             HttpServletRequest servletRequest,
             @Valid @RequestBody UserPatchRequest request) {
         this.logger.info(servletRequest);
         User updating = this.userMapper.toUser(request);
-        User updated = this.selfUserService.patchSelfUser(updating);
-        UserResponse responseBody = this.userMapper.toUserResponse(updated);
+        UserResponse responseBody = this.selfUserResponseService.patchSelfUser(updating);
         return ResponseEntity.status(HttpStatus.OK).body(responseBody);
     }
 
     @DeleteMapping
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<Void> deleteSelfUser(HttpServletRequest servletRequest) {
         this.logger.info(servletRequest);
         this.selfUserService.deleteSelfUser();
