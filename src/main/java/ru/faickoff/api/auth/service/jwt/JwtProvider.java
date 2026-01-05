@@ -7,6 +7,7 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import lombok.NonNull;
 import lombok.experimental.NonFinal;
 import lombok.extern.log4j.Log4j2;
 import ru.faickoff.api.auth.exception.TokenValidationException;
+import ru.faickoff.api.auth.mapper.role.RoleMapper;
 import ru.faickoff.api.auth.model.User;
 
 @Service
@@ -31,16 +33,19 @@ public class JwtProvider {
     private final SecretKey jwtRefreshSecret;
     private final int jwtAccessTokenExpirationSeconds;
     private final int jwtRefreshTokenExpirationSeconds;
+    private final RoleMapper roleMapper;
 
     public JwtProvider(
             @Value("${ru.faickoff.api.auth.jwt.secret.access}") String jwtAccessSecret,
             @Value("${ru.faickoff.api.auth.jwt.secret.refresh}") String jwtRefreshSecret,
             @Value("${ru.faickoff.api.auth.jwt.expiration.access}") int jwtAccessTokenExpirationSeconds,
-            @Value("${ru.faickoff.api.auth.jwt.expiration.refresh}") int jwtRefreshTokenExpirationSeconds) {
+            @Value("${ru.faickoff.api.auth.jwt.expiration.refresh}") int jwtRefreshTokenExpirationSeconds,
+            @Autowired RoleMapper roleMapper) {
         this.jwtAccessSecret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtAccessSecret));
         this.jwtRefreshSecret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtRefreshSecret));
         this.jwtAccessTokenExpirationSeconds = jwtAccessTokenExpirationSeconds;
         this.jwtRefreshTokenExpirationSeconds = jwtRefreshTokenExpirationSeconds;
+        this.roleMapper = roleMapper;
     }
 
     public String generateAccessToken(@NonFinal User user) {
@@ -55,7 +60,7 @@ public class JwtProvider {
                 .signWith(this.jwtAccessSecret)
                 .claim("id", user.getId())
                 .claim("username", user.getUsername())
-                .claim("roles", user.getRoles())
+                .claim("roles", this.roleMapper.toRoleResponses(user.getRoles()))
                 .compact();
     }
 
