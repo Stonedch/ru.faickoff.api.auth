@@ -30,7 +30,7 @@ services:
   tomcat:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.tomcat
     container_name: ${DOCKER_NAME}-tomcat
     ports:
       - "${TOMCAT_PORT}:${TOMCAT_PORT}"

@@ -13,3 +13,11 @@ services:
       retries: 5
     ports:
       - "${DB_PORT}:5432"
+    networks:
+      - main
+
+networks:
+  main:
+    driver: bridge
+    name: ${DOCKER_NETWORK_NAME}
+

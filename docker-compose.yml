@@ -1,6 +1,11 @@
 services:
   db:
-    image: postgres:16-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+      args:
+        PUID: ${UID:-1000}
+        PGID: ${GID:-1000}
     container_name: ${DOCKER_NAME}-db
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -30,7 +35,7 @@ services:
   tomcat:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.tomcat
     container_name: ${DOCKER_NAME}-tomcat
     ports:
       - "${TOMCAT_PORT}:${TOMCAT_PORT}"

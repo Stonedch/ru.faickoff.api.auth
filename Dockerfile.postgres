@@ -1,0 +1,10 @@
+FROM postgres:16-alpine
+
+RUN su root
+
+ARG PUID
+ARG PGID
+
+RUN deluser postgres && addgroup -g $PGID postgres && adduser -u $PUID -G postgres -D postgres;
+
+RUN chown -R $PUID:$PGID /var/lib/postgresql /var/run/postgresql
