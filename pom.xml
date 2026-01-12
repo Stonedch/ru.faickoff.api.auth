@@ -6,9 +6,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.faickoff</groupId>
     <artifactId>api.auth</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
     <name>api.auth</name>
-    <description>REST API auth microservice of Faickoff</description>
+    <description>A secure and scalable JWT-based authentication microservice designed specifically for Google Gemini AI REST API ecosystems</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
