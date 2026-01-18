@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "ru.faickoff.api.auth",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
